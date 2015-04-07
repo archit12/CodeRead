@@ -62,7 +62,7 @@ class CodeRead {
 			case '1':
 				require_once "Compiler/CCompiler.php";
 				$cCompiler = new CCompiler($codeFile);
-				$cCompiler->compile();
+				$output = $cCompiler->compile();
 				break;
 			
 			case '2':
@@ -78,6 +78,7 @@ class CodeRead {
 				break;
 
 		}
+		return $output;
 	}
 
 	public function execute()
@@ -85,6 +86,10 @@ class CodeRead {
 		$preprocessedImage = $this->preprocessImage($this->file);
 		$codeFile          = $this->recognizeText($this->file);
 		$newCodeFile       = $this->correctErrorsInCode($codeFile);
-		$this->compileCode($this->language, $newCodeFile);
+
+		$result = new stdClass;
+		$result->code   = file_get_contents($newCodeFile->filePath);
+		$result->output = $this->compileCode($this->language, $newCodeFile);
+		return $result;
 	}
 }

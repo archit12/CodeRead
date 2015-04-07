@@ -27,7 +27,7 @@ class CCompiler implements ICompiler{
             $outputFilePath = $this->outputFile->filePath;
             $command = $outputFilePath;
             exec('"' . $command.'"', $output);
-            print_r($output);
+            return $output;
         }
         else {
             system("$command 2>&1");

@@ -1,51 +1,12 @@
 <?php
-// Target directory for images
-$target_dir = "public/upload/";
-
-$target_file = $target_dir . time() . "." . pathinfo($_FILES["image"]["name"],PATHINFO_EXTENSION);
-$uploadOk = 1;
-$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
-
-// Check if image file is a actual image or fake image
-if(isset($_FILES["image"])) {
-    $check = getimagesize($_FILES["image"]["tmp_name"]);
-    if($check !== false) {
-        $uploadOk = 1;
-    } else {
-        echo "File is not an image.";
-        $uploadOk = 0;
-    }
-}
-// Check if file already exists
-if (file_exists($target_file)) {
-    echo "Sorry, file already exists.";
-    $uploadOk = 0;
-}
-// Check file size
-if ($_FILES["image"]["size"] > 500000) {
-    echo "Sorry, your file is too large.";
-    $uploadOk = 0;
-}
-// Allow certain file formats
-if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-&& $imageFileType != "gif" ) {
-    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-    $uploadOk = 0;
-}
-// Check if $uploadOk is set to 0 by an error
-if ($uploadOk == 0) {
-    echo "Sorry, your file was not uploaded.";
-// if everything is ok, try to upload file
-} else {
-    if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-        require_once "Repositories/CR_File.php";
-        require_once "CodeRead.php";
-        $image    = new CR_File($target_file);
-        $codeRead = new CodeRead($image, 1);
-        $result   = $codeRead->execute();
-    } else {
-        echo "Sorry, there was an error uploading your file.";
-    }
+if (isset($_POST['code'])) {
+  require_once "Repositories/CR_File.php";
+  require_once "Compiler/CCompiler.php";
+  $codeFilePath = "public/output/reviewCode.c";
+  $file         = new CR_File($codeFilePath);
+  $file->write($_POST['code']);
+  $compiler     = new CCompiler($file);
+  $output       = $compiler->compile();
 }
 ?>
 <!DOCTYPE html>
@@ -113,10 +74,10 @@ if ($uploadOk == 0) {
       <form class="col-lg-4 col-lg-offset-3" method="post" action="runCode.php">
       <div class="row">
         <div class="form-group">
-        <label>Code:</label>
+        <label>Output:</label>
           <textarea id="code" name="code" cols="60" rows="8">
               <?php
-              print_r($result->code);
+                echo $output[0];
               ?>
           </textarea>
         </div>
@@ -128,12 +89,6 @@ if ($uploadOk == 0) {
     <br>
     <br>
     <br>
-    <div class="col-lg-4 col-lg-offset-3"> 
-    <h3>Output</h3>
-        <?php
-            print_r($result->output[0]);
-        ?>
-    </div>
     </div>
 </body>
   <script src="public/assets/js/bootstrap.min.js"></script>

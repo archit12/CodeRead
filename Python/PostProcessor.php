@@ -17,7 +17,6 @@ class PostProcessor {
 	public function postProcess()
 	{
 		$command = $this->generateCommand();
-		echo $command."<br>";
 		exec($command);
 		return $this->outputFile;
 	}
